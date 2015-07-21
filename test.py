@@ -3,6 +3,7 @@ __author__ = 'Kirill'
 from async_loader import DownloadManager as Downloader
 from queue import Queue
 from twitch_api import take_broadcasts
+import content_handler as ch
 
 
 def loader_test():
@@ -18,18 +19,18 @@ def loader_test():
             'https://api.twitch.tv/kraken/videos/v6627227', ]
     queue = Queue()
     out_queue = Queue()
-    for url in urls:
-        queue.put(url)
 
     manager = Downloader(queue, out_queue, 10)
     manager.start()
 
-    while True:
-        try:
-            data = out_queue.get()
-            print('Downloaded %s' % data.decode('utf-8')[0:40])
-        except Exception as exc:
-            print('  Error: %s' % exc)
+    for url in urls:
+        queue.put(url)
+
+    handler = ch.PartHandler(out_queue)
+    handler.start()
+
+    queue.join()
+    out_queue.join()
 
 
 def api_test():
@@ -37,4 +38,5 @@ def api_test():
     for b in blist:
         print(b.title)
 
-api_test()
+
+loader_test()

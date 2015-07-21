@@ -5,6 +5,7 @@ import json
 
 
 class TwitchAPI:
+    """ Static class for Twitch API constants """
     API_DOMAIN = 'https://api.twitch.tv'
     KRAKEN = '/kraken'
     API = '/api'
@@ -13,6 +14,8 @@ class TwitchAPI:
 
 
 class Broadcast:
+    """ A class represents twitch vod """
+
     def __init__(self, title, vod_id, date, game, length, url, channel):
         self.title = title
         self.id = vod_id
@@ -27,6 +30,12 @@ class Broadcast:
 
 
 def take_broadcasts(channel):
+    """ Get list of past broadcasts.
+    :param channel: channel name
+    :type channel: str
+    :return: list of Broadcast objects
+    :rtype: list
+    """
     broadcasts_url = (TwitchAPI.API_DOMAIN +
                       TwitchAPI.KRAKEN +
                       '/channels/' +
@@ -50,3 +59,8 @@ def take_broadcasts(channel):
         with urllib.request.urlopen(broadcasts_url) as response:
             broadcasts_json = json.loads(response.read().decode('utf-8'))
     return broadcasts
+
+
+def download(id_list, resume=False):
+    # TODO implement downloading function
+    pass
