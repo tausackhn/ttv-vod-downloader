@@ -3,7 +3,8 @@ __author__ = 'Kirill'
 
 import argparse
 import sys
-from twitch_api import download
+from twitch_api import download_ids
+from twitch_api import download_all
 
 parser = argparse.ArgumentParser(description='Download the vod by id, all vods by channel name.')
 group = parser.add_mutually_exclusive_group()
@@ -29,19 +30,18 @@ if len(sys.argv) == 1:
     sys.exit(1)
 
 args = vars(parser.parse_args())
-print(args)
 if args['id']:
-    print('Downloading /v/%i' % args['id'])
-    download([args['id']])
+    print('Downloading /v%i' % args['id'])
+    download_ids([args['id']])
 elif args['ids']:
     print('Downloading ids: ' + str(args['ids']).strip('[]'))
     if args['continue']:
-        download(args['ids'], resume=True)
+        download_ids(args['ids'], resume=True)
     else:
-        download(args['ids'])
+        download_ids(args['ids'])
 elif args['channel_name']:
     print('Downloading vods from channel %s' % args['channel_name'])
     if args['continue']:
-        download(args['channel_name'], resume=True)
+        download_all(args['channel_name'], resume=True)
     else:
-        download(args['channel_name'])
+        download_all(args['channel_name'])
