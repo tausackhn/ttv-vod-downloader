@@ -24,6 +24,11 @@ parser.add_argument('id',
                     nargs='?',
                     type=int,
                     help='an twitch vod id, ignore other arguments if declared')
+parser.add_argument('-t', '--threads',
+                    metavar='NUM',
+                    type=int,
+                    default=20,
+                    help='number of downloading threads (default: %(default)s)')
 
 if len(sys.argv) == 1:
     parser.print_help()
@@ -31,17 +36,11 @@ if len(sys.argv) == 1:
 
 args = vars(parser.parse_args())
 if args['id']:
-    print('Downloading /v%i' % args['id'])
-    download_ids([args['id']])
+    print('Download v%i...\n' % args['id'])
+    download_ids([args['id']], resume=args['continue'], num_threads=args['threads'])
 elif args['ids']:
-    print('Downloading ids: ' + str(args['ids']).strip('[]'))
-    if args['continue']:
-        download_ids(args['ids'], resume=True)
-    else:
-        download_ids(args['ids'])
+    print('Download ids: ' + str(args['ids']).strip('[]') + '...\n')
+    download_ids(args['ids'], resume=args['continue'], num_threads=args['threads'])
 elif args['channel_name']:
-    print('Downloading vods from channel %s' % args['channel_name'])
-    if args['continue']:
-        download_all(args['channel_name'], resume=True)
-    else:
-        download_all(args['channel_name'])
+    print('Download vods from channel %s...\n' % args['channel_name'])
+    download_all(args['channel_name'], resume=args['continue'], num_threads=args['threads'])
