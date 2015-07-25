@@ -3,6 +3,7 @@ __author__ = 'Kirill'
 
 from threading import Thread
 import urllib.request
+from http.client import IncompleteRead
 
 
 class DownloadingThread(Thread):
@@ -16,10 +17,14 @@ class DownloadingThread(Thread):
     def run(self):
         while True:
             url = self.url_queue.get()
-            try:
-                self.download_url(url)
-            except Exception as exc:
-                print('%s generated an exception %s' % (url, exc))
+            while True:
+                try:
+                    self.download_url(url)
+                except IncompleteRead:
+                    continue
+                except Exception as error:
+                    print("\rUnexpected error: %s with args: %s" % (error, error.args))
+                break
             self.url_queue.task_done()
 
     def download_url(self, url):

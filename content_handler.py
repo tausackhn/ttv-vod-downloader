@@ -19,6 +19,7 @@ class PartHandler(Thread):
         self.num_chunks = len(sorted_chunks)
         self.num_chunks_done = 0
         self.chunks_data = [0] * self.num_chunks
+        self.chunk_size = 920360  # approximate size of 1 chunk
 
     def run(self):
         while True:
@@ -35,7 +36,10 @@ class PartHandler(Thread):
             self.num_chunks_done += 1
             num_octotorp = math.floor(20 * self.num_chunks_done / self.num_chunks)
             done_percent = 100 * self.num_chunks_done / self.num_chunks
-            print('\r[' + '#' * num_octotorp + ' ' * (20 - num_octotorp) + ']  %6.2f' % done_percent + '%', end='')
+            file_size = self.chunk_size * self.num_chunks / 1024 / 1024 / 1024
+            file_size_done = self.chunk_size * self.num_chunks_done / 1024 / 1024 / 1024
+            print('\r[' + '#' * num_octotorp + ' ' * (20 - num_octotorp) + '] %4.1f/%4.1fGB  %6.2f' % (
+                file_size_done, file_size, done_percent) + '%', end='')
             self.data_queue.task_done()
 
     def set_output(self, path):

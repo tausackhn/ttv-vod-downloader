@@ -4,10 +4,10 @@ __author__ = 'Kirill'
 import urllib.request
 import json
 import os
-import re
-import sys
 from queue import Queue
 from urllib.parse import urljoin
+
+import m3u8
 from async_loader import DownloadManager
 from content_handler import PartHandler
 
@@ -43,9 +43,8 @@ class Broadcast:
         with urllib.request.urlopen(playlists_url) as response:
             variant_playlist = response.readlines()
         source_playlist_url = variant_playlist[3].decode('ASCII')  # source video
-        with urllib.request.urlopen(source_playlist_url) as m3u8_list:
-            decoded_list = list(map(lambda x: x.decode('ASCII'), m3u8_list.readlines()))
-            chunks_rel_path = chunks_short(decoded_list)
+        m3u8_list = m3u8.load(source_playlist_url)
+        chunks_rel_path = m3u8_list.segments.uri
         self.chunks = list(map(lambda x: urljoin(source_playlist_url, x), chunks_rel_path))
 
 
@@ -145,37 +144,3 @@ def create_info(vod):
     file = open('info.txt', mode='w')
     file.write(json.dumps(vod.json_info))
     file.close()
-
-
-def chunks_short(m3u8_list):
-    """ Simple m3u8 list parser
-    :param m3u8_list: list of lines in m3u8 format
-    :type m3u8_list: list
-    :return: list of relative paths to chunks
-    :rtype: list
-    """
-    i = 9  # first chunk
-    path_re = re.compile('(index-\d*-[\w-]*\.ts)\?start_offset=(\d+)&end_offset=(\d+)')
-    chunks = []
-    match = path_re.match(m3u8_list[i])
-    if match:
-        name = match.group(1)
-        start_offset = match.group(2)
-        end_offset = match.group(3)
-        i += 2
-    else:
-        print('Error while getting first chunk of video')
-        sys.exit(-1)
-    while i < len(m3u8_list):
-        match = path_re.match(m3u8_list[i])
-        if match:
-            if name != match.group(1):
-                chunk_path = name + '?start_offset=' + start_offset + '&end_offset=' + end_offset
-                chunks.append(chunk_path)
-                name = match.group(1)
-                start_offset = match.group(2)
-            end_offset = match.group(3)
-        i += 2
-    last_chunk_path = name + '?start_offset=' + start_offset + '&end_offset=' + end_offset
-    chunks.append(last_chunk_path)
-    return chunks
