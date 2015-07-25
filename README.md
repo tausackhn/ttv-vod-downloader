@@ -1,7 +1,7 @@
 # ttv-vod-downloader
 Twitch broadcast downloader which support new HLS video format.
 
-Script realise asynchronous downloading of video chunks. This method is really faster than sequantial downloading by ffmpeg.
+Script realise asynchronous downloading of video chunks. This method is really faster than sequential downloading by ffmpeg.
 ```
 Usage: ttv-vod-downloader.py [-h] [-i ID [ID ...] | -n NAME] [-c] [-t NUM] [ID]
 

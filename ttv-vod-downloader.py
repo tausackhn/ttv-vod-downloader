@@ -1,3 +1,4 @@
+# coding=utf-8
 """ Asynchronous twitch broadcast downloader """
 __author__ = 'Kirill'
 
@@ -5,6 +6,7 @@ import argparse
 import sys
 from twitch_api import download_ids
 from twitch_api import download_all
+import time
 
 parser = argparse.ArgumentParser(description='Download the vod by id, all vods by channel name.')
 group = parser.add_mutually_exclusive_group()
@@ -35,6 +37,7 @@ if len(sys.argv) == 1:
     sys.exit(1)
 
 args = vars(parser.parse_args())
+start = time.clock()
 if args['id']:
     print('Download v%i...\n' % args['id'])
     download_ids([args['id']], resume=args['continue'], num_threads=args['threads'])
@@ -44,3 +47,4 @@ elif args['ids']:
 elif args['channel_name']:
     print('Download vods from channel %s...\n' % args['channel_name'])
     download_all(args['channel_name'], resume=args['continue'], num_threads=args['threads'])
+print('\nTime elapsed: ' + str(time.clock() - start) + ' sec.')
