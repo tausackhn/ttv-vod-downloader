@@ -28,18 +28,19 @@ class PartHandler(Thread):
             self.chunks_data[index] = part['data']
             if index == 0:
                 while len(self.chunks_data) > 0 and self.chunks_data[0] != 0:
-                    data = self.chunks_data.pop(0)
-                    self.output_file.write(data)
-                    self.output_file.flush()
+                    self.output_file.write(self.chunks_data.pop(0))
                     self.sorted_chunks.pop(0)
+                self.output_file.flush()
 
             self.num_chunks_done += 1
+            self.chunk_size += (len(part['data']) - self.chunk_size) / self.num_chunks_done
             num_octotorp = math.floor(20 * self.num_chunks_done / self.num_chunks)
             done_percent = 100 * self.num_chunks_done / self.num_chunks
             file_size = self.chunk_size * self.num_chunks / 1024 / 1024 / 1024
             file_size_done = self.chunk_size * self.num_chunks_done / 1024 / 1024 / 1024
-            print('\r[' + '#' * num_octotorp + ' ' * (20 - num_octotorp) + '] %4.1f/%4.1fGB  %6.2f' % (
-                file_size_done, file_size, done_percent) + '%', end='')
+            print('\r{:6.2f}%  ['.format(done_percent) + '#' * num_octotorp + ' ' * (
+            20 - num_octotorp) + '] %4.1f/%4.1fGB' % (
+                      file_size_done, file_size) + '    Press Ctrl+C to exit.', end='')
             self.data_queue.task_done()
 
     def set_output(self, path):

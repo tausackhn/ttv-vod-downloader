@@ -4,6 +4,8 @@ __author__ = 'Kirill'
 from threading import Thread
 import urllib.request
 from http.client import IncompleteRead
+import urllib.error
+import gc
 
 
 class DownloadingThread(Thread):
@@ -22,8 +24,11 @@ class DownloadingThread(Thread):
                     self.download_url(url)
                 except IncompleteRead:
                     continue
-                except Exception as error:
-                    print("\rUnexpected error: %s with args: %s" % (error, error.args))
+                except MemoryError:
+                    gc.collect()
+                    continue
+                except urllib.error.HTTPError:
+                    continue
                 break
             self.url_queue.task_done()
 

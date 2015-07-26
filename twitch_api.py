@@ -6,8 +6,10 @@ import json
 import os
 from queue import Queue
 from urllib.parse import urljoin
+from time import sleep
 
 import m3u8
+
 from async_loader import DownloadManager
 from content_handler import PartHandler
 
@@ -75,7 +77,11 @@ def download_vods(broadcasts, num_threads, resume=False):
         part_handler.set_sorted_parts(vod.chunks)
         for url in vod.chunks:
             url_queue.put(url)
+        while not url_queue.empty():
+            sleep(0.1)
         url_queue.join()
+        while not response_queue.empty():
+            sleep(0.1)
         response_queue.join()
         open('_finished', 'w').close()
         print('\nBroadcast v%s downloading finished.' % vod.vod_id)
