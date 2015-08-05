@@ -37,6 +37,10 @@ parser.add_argument('-p', '--path',
                     metavar='PATH',
                     default='.',
                     help='path to directory where to save broadcasts')
+parser.add_argument('--max_cache_size',
+                    metavar='SIZE',
+                    default=100,
+                    help='maximal size of cache list, 1 corresponds to ~1MB (default: %(default)s)')
 
 args = vars(parser.parse_args())
 
@@ -49,13 +53,22 @@ try:
         os.chdir(args['path'])
     if args['id']:
         print('Download v%i...\n' % args['id'])
-        download_ids([args['id']], resume=args['continue'], num_threads=args['threads'])
+        download_ids([args['id']],
+                     resume=args['continue'],
+                     num_threads=args['threads'],
+                     max_cache_size=args['max_cache_size'])
     elif args['ids']:
         print('Download ids: ' + str(args['ids']).strip('[]') + '...\n')
-        download_ids(args['ids'], resume=args['continue'], num_threads=args['threads'])
+        download_ids(args['ids'],
+                     resume=args['continue'],
+                     num_threads=args['threads'],
+                     max_cache_size=args['max_cache_size'])
     elif args['channel_name']:
         print('Download vods from channel %s...\n' % args['channel_name'])
-        download_all(args['channel_name'], resume=args['continue'], num_threads=args['threads'])
+        download_all(args['channel_name'],
+                     resume=args['continue'],
+                     num_threads=args['threads'],
+                     max_cache_size=args['max_cache_size'])
 
     print('\nTotal time taken: %.0f sec.' % (time.clock() - start))
 except KeyboardInterrupt:

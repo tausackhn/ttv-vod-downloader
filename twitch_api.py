@@ -11,7 +11,7 @@ from time import sleep
 import m3u8
 
 from async_loader import DownloadManager
-from content_handler import PartHandler
+from content_handler import PartHandler, ConsoleWriter
 
 
 class TwitchAPI:
@@ -37,12 +37,12 @@ class Broadcast:
                      '/vods/' + self.vod_id + '/access_token')
         with urllib.request.urlopen(token_url) as response:
             token_json = json.loads(response.read().decode('utf-8'))
-        playlists_url = (TwitchAPI.USHER_DOMAIN +
-                         '/vod/' + self.vod_id +
-                         '?nauthsig=' + token_json['sig'] +
-                         '&nauth=' + token_json['token'] +
-                         '&allow_source=true')
-        with urllib.request.urlopen(playlists_url) as response:
+        quality_playlist_url = (TwitchAPI.USHER_DOMAIN +
+                                '/vod/' + self.vod_id +
+                                '?nauthsig=' + token_json['sig'] +
+                                '&nauth=' + token_json['token'] +
+                                '&allow_source=true')
+        with urllib.request.urlopen(quality_playlist_url) as response:
             variant_playlist = response.readlines()
         source_playlist_url = variant_playlist[3].decode('ASCII')  # source video
         m3u8_list = m3u8.load(source_playlist_url)
@@ -50,17 +50,23 @@ class Broadcast:
         self.chunks = list(map(lambda x: urljoin(source_playlist_url, x), chunks_rel_path))
 
 
-def download_vods(broadcasts, num_threads, resume=False):
+def download_vods(broadcasts, num_threads, resume=False, max_cache_size=100):
     """ Download broadcasts from list with Broadcast objects
     :param broadcasts: list of Broadcast objects
     :type broadcasts: list
     """
     url_queue = Queue()
     response_queue = Queue()
-    dm = DownloadManager(url_queue, response_queue, num_threads)
-    part_handler = PartHandler(response_queue)
+    dm = DownloadManager(url_queue=url_queue,
+                         data_queue=response_queue,
+                         max_threads=num_threads)
+    part_handler = PartHandler(download_manager=dm,
+                               data_queue=response_queue,
+                               max_cache_size=max_cache_size)
+    view = ConsoleWriter(part_handler)
     dm.start()
     part_handler.start()
+    view.start()
 
     for vod in broadcasts:
         print('Broadcast v%s downloading has been started.' % vod.vod_id)
@@ -112,20 +118,20 @@ def take_broadcasts(channel):
     return broadcasts.reverse()  # oldest must be downloaded first
 
 
-def download_ids(id_list, num_threads, resume=False):
+def download_ids(id_list, num_threads, resume=False, max_cache_size=100):
     """ Download broadcasts from list with ids
     :param id_list: list with broadcast ids
     :type id_list: list
     """
-    download_vods([id_to_broadcast(vod_id) for vod_id in id_list], num_threads, resume)
+    download_vods([id_to_broadcast(vod_id) for vod_id in id_list], num_threads, resume, max_cache_size)
 
 
-def download_all(channel, num_threads, resume=False):
+def download_all(channel, num_threads, resume=False, max_cache_size=100):
     """ Download available broadcasts from channel
     :param channel: channel name
     :type channel: str
     """
-    download_vods(take_broadcasts(channel), num_threads, resume)
+    download_vods(take_broadcasts(channel), num_threads, resume, max_cache_size)
 
 
 def id_to_broadcast(vod_id):
