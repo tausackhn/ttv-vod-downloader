@@ -1,4 +1,5 @@
-# TwitchTV VOD downloader
+TwitchTV VOD downloader
+========
 The downloader support new HLS video format (only). Example url with HLS broadcast:
 `http://www.twitch.tv/mushisgosu/v/9794595`
 
@@ -7,7 +8,7 @@ Broadcasts will be downloaded in separate folders
 `./{channel_name}/{vod_id}/` 
 in a `{vod_id}.ts` file, `info.txt` with json info and `_finished` file if downloading has been finished.
 Later you can easily convert *.ts files in another with ffmpeg.
-## Usage
+### Usage
 ```
 python ttv-vod-downloader.py [-h] [-i ID [ID ...] | -n NAME] [-r] [-t NUM]
                              [-p PATH] [--max_cache_size SIZE]
@@ -36,7 +37,7 @@ optional arguments:
                         (default: 100)
   --urls_file FILE      path to file with a list of urls, one per line.
 ```
-## Using examples
+### Using examples
 `python ttv-vod-downloader.py http://www.twitch.tv/guit88man/v/11188942`
 
 `python ttv-vod-downloader.py -r -n mushisgosu`
@@ -44,3 +45,7 @@ optional arguments:
 `python ttv-vod-downloader.py -i 9794595 9558360 9551422`
 
 `python ttv-vod-downloader.py --url_file best_vods.txt`
+
+### Credits
+Special thanks:
+* Tester who wants to remain anonymous.
