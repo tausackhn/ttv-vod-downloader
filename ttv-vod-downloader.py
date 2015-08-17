@@ -27,7 +27,8 @@ def get_id_list(path):
     return id_list
 
 
-parser = argparse.ArgumentParser(description='Download specific Twitch broadcasts by id or all from specific channel.')
+parser = argparse.ArgumentParser(description='Download Twitch broadcasts by url or ids list or '
+                                             'all vods from specific channel.')
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-i', '--ids',
                    nargs='+',
@@ -37,11 +38,10 @@ group.add_argument('-i', '--ids',
 group.add_argument('-n', '--channel_name',
                    metavar='NAME',
                    help='download all available vods by twitch channel name')
-parser.add_argument('-c', '--continue',
+parser.add_argument('-r', '--reload',
                     action='store_true',
-                    default=True,
-                    help='continue previous downloading, require "_finished" file in directory with finished vod '
-                         '(default: %(default)s)')
+                    default=False,
+                    help='ignore finished broadcasts, if _finished file exists (default: %(default)s)')
 parser.add_argument('url',
                     metavar='URL',
                     nargs='?',
@@ -87,7 +87,7 @@ try:
             elif info['type'] == 'v':
                 print('Downloading /v/%s...' % info['id'])
                 download_ids([info['id']],
-                             resume=args['continue'],
+                             resume=not args['reload'],
                              num_threads=args['threads'],
                              max_cache_size=args['max_cache_size'])
             else:
@@ -100,19 +100,19 @@ try:
         else:
             print('Download past broadcasts from %s...' % args['urls_file'])
             download_ids(urls,
-                         resume=args['continue'],
+                         resume=not args['reload'],
                          num_threads=args['threads'],
                          max_cache_size=args['max_cache_size'])
     elif args['ids']:
         print('Download ids: ' + str(args['ids']).strip('[]') + '...')
         download_ids(args['ids'],
-                     resume=args['continue'],
+                     resume=not args['reload'],
                      num_threads=args['threads'],
                      max_cache_size=args['max_cache_size'])
     elif args['channel_name']:
         print('Download vods from channel %s...\n' % args['channel_name'])
         download_all(args['channel_name'],
-                     resume=args['continue'],
+                     resume=not args['reload'],
                      num_threads=args['threads'],
                      max_cache_size=args['max_cache_size'])
 
