@@ -2,8 +2,11 @@
 __author__ = 'Kirill'
 
 import urllib.request
+import urllib.error
 import json
 import os
+import re
+import sys
 from queue import Queue
 from urllib.parse import urljoin
 from time import sleep
@@ -143,8 +146,12 @@ def id_to_broadcast(vod_id):
                      TwitchAPI.KRAKEN +
                      '/videos/v' +
                      str(vod_id))
-    with urllib.request.urlopen(broadcast_url) as response:
-        broadcast_json = json.loads(response.read().decode('utf-8'))
+    try:
+        with urllib.request.urlopen(broadcast_url) as response:
+            broadcast_json = json.loads(response.read().decode('utf-8'))
+    except urllib.error.URLError:
+        print('Incorrect broadcast url.')
+        sys.exit(1)
     return Broadcast(broadcast_json['_id'].strip('v'), broadcast_json)
 
 
@@ -156,3 +163,14 @@ def create_info(vod):
     file = open('info.txt', mode='w')
     file.write(json.dumps(vod.json_info))
     file.close()
+
+
+def parse_twitch_url(url):
+    match = re.search('https?://(?:www.)?twitch.tv/(?P<channel_name>\w+)/(?P<type>\D{1})/(?P<id>\d+)', url,
+                      flags=re.IGNORECASE)
+    info = None
+    if match:
+        info = {'channel_name': match.group('channel_name'),
+                'type': match.group('type'),
+                'id': int(match.group('id'))}
+    return info

@@ -23,12 +23,12 @@ class DownloadingThread(Thread):
                 while True:
                     try:
                         self.download_url(url)
+                    except urllib.error.URLError:
+                        continue
                     except IncompleteRead:
                         continue
                     except MemoryError:
                         gc.collect()
-                        continue
-                    except urllib.error.HTTPError:
                         continue
                     break
                 self.url_queue.task_done()
