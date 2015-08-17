@@ -43,4 +43,4 @@ optional arguments:
 
 `python ttv-vod-downloader.py -i 9794595 9558360 9551422`
 
-`python ttv-vod-downloader.py --urlf_file best_vods.txt`
+`python ttv-vod-downloader.py --url_file best_vods.txt`

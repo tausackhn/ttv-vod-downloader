@@ -26,7 +26,7 @@ class TwitchAPI:
     HLS_DOMAIN = 'https://vod.ak.hls.ttvnw.net/v1/AUTH_system'
 
 
-class Broadcast:
+class Broadcast(object):
     """ A class represents twitch vod """
 
     def __init__(self, vod_id, json_info):
@@ -109,16 +109,21 @@ def take_broadcasts(channel):
                       '/channels/' +
                       channel +
                       '/videos?broadcasts=true')
-    with urllib.request.urlopen(broadcasts_url) as response:
-        broadcasts_json = json.loads(response.read().decode('utf-8'))
     broadcasts = []
-    while len(broadcasts_json['videos']) > 0:
-        for vod in broadcasts_json['videos']:
-            broadcasts.append(Broadcast(vod['_id'].strip('v'), vod))
-        broadcasts_url = broadcasts_json['_links']['next']
+    try:
         with urllib.request.urlopen(broadcasts_url) as response:
             broadcasts_json = json.loads(response.read().decode('utf-8'))
-    return broadcasts.reverse()  # oldest must be downloaded first
+        while len(broadcasts_json['videos']) > 0:
+            for vod in broadcasts_json['videos']:
+                broadcasts.append(Broadcast(vod['_id'].strip('v'), vod))
+            broadcasts_url = broadcasts_json['_links']['next']
+            with urllib.request.urlopen(broadcasts_url) as response:
+                broadcasts_json = json.loads(response.read().decode('utf-8'))
+    except urllib.error.HTTPError:
+        print('Incorrect channel name.')
+        sys.exit(1)
+    broadcasts.reverse()  # oldest must be downloaded first
+    return broadcasts
 
 
 def download_ids(id_list, num_threads, resume=False, max_cache_size=100):

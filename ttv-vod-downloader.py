@@ -66,7 +66,7 @@ parser.add_argument('--urls_file',
 args = vars(parser.parse_args())
 
 start = time.clock()
-if args['url'] and args['ids'] and args['urls_file']:
+if args['url'] is None and args['ids'] is None and args['urls_file'] is None and args['channel_name'] is None:
     print('Require at least a broadcast url.\nShort manual: %s -h' % sys.argv[0])
     sys.exit(1)
 try:
