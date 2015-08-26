@@ -3,6 +3,8 @@ TwitchTV VOD downloader
 The downloader support new HLS video format (only). Example url with HLS broadcast:
 `http://www.twitch.tv/mushisgosu/v/9794595`
 
+Latest builds: ![Windows](https://github.com/tausackhn/ttv-vod-downloader/releases/latest)
+
 Script realise asynchronous downloading of video chunks. This method is really faster than sequential downloading by ffmpeg.
 Broadcasts will be downloaded in separate folders 
 `./{channel_name}/{vod_id}/` 
