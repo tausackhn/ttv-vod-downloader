@@ -45,11 +45,14 @@ class Broadcast(object):
                                 '?nauthsig=' + token_json['sig'] +
                                 '&nauth=' + token_json['token'] +
                                 '&allow_source=true')
-        with urllib.request.urlopen(quality_playlist_url) as response:
-            variant_playlist = response.readlines()
-        source_playlist_url = variant_playlist[3].decode('ASCII')  # source video
-        m3u8_list = m3u8.load(source_playlist_url)
-        chunks_rel_path = m3u8_list.segments.uri
+        variant_playlist = m3u8.load(quality_playlist_url)
+        try:
+            source_playlist_url = next(i.uri for i in variant_playlist.playlists if i.media[0].group_id == 'chunked')
+        except StopIteration:
+            print('Source(Chunked) playlist have not found.')
+            sys.exit(0)
+        chunks_m3u8 = m3u8.load(source_playlist_url)
+        chunks_rel_path = chunks_m3u8.segments.uri
         self.chunks = list(map(lambda x: urljoin(source_playlist_url, x), chunks_rel_path))
 
 
